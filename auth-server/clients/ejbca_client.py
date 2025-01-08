@@ -14,16 +14,15 @@ class EJBCAClient:
 
     def __init__(self, base_url: str, certificate_path: str, key_path: str):
         self.base_url = base_url
-        self.cert = (
-            certificate_path,
-            key_path
-        )
+        self.certificate_path = certificate_path
+        self.key_path = key_path
+        
 
         # Validate that both certificate and key paths exist
-        if not self.cert_path or not self.key_path:
+        if not self.certificate_path or not self.key_path:
             raise ValueError("Client certificate or key path not provided.")
-        if not self._validate_file(self.cert_path):
-            raise ValueError(f"Certificate file not found: {self.cert_path}")
+        if not self._validate_file(self.certificate_path):
+            raise ValueError(f"Certificate file not found: {self.certificate_path}")
         if not self._validate_file(self.key_path):
             raise ValueError(f"Key file not found: {self.key_path}")
 
@@ -41,7 +40,7 @@ class EJBCAClient:
         url = f"{self.base_url}/certificates/{serial_number}"
 
         try:
-            response = self.session.get(url, cert=self.cert)
+            response = self.session.get(url, cert=self.certificate_path)
 
             if response.status_code == 200:
                 return response.json()
