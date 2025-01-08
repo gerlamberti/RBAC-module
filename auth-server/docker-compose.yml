@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  fastapi-auth:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/code/app
+    command: ["fastapi", "run", "app/main.py", "--port", "8000", "--workers", "4", "--reload"]
