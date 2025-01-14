@@ -4,6 +4,19 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from fastapi import HTTPException, status
+from pydantic import BaseModel
+from typing import Tuple
+
+class RevocationStatus(BaseModel):
+    """
+    A structured representation of the certificate revocation status.
+    """
+    issuer_dn: Optional[str]
+    serial_number: Optional[str]
+    revocation_reason: Optional[str]
+    revocation_date: Optional[str]
+    message: Optional[str]
+    revoked: Optional[bool]
 
 
 class EJBCAClient:
@@ -37,32 +50,9 @@ class EJBCAClient:
 
         self.session.hooks['response'] = [log_request]
 
-    def fetch_certificate(self, serial_number: str) -> dict:
-        """
-        Fetch the certificate by serial number from EJBCA.
-        Returns the certificate data or raises an HTTPException if not found.
-        """
-        url = f"{self.base_url}/certificates/{serial_number}"
+    
 
-        try:
-            response = self.session.get(url)
-
-            if response.status_code == 200:
-                return response.json()
-            elif response.status_code == 404:
-                return None
-            else:
-                raise HTTPException(
-                    status_code=response.status_code,
-                    detail=f"Error fetching certificate: {response.text}"
-                )
-        except requests.RequestException as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to connect to EJBCA: {str(e)}"
-            )
-
-    def get_revocation_status(self, issuer_dn: str, cert_serial: str) -> dict:
+    def get_revocation_status(self, issuer_dn: str, cert_serial: str) -> Tuple[RevocationStatus, object]:
         """
         Get the revocation status of a certificate by its serial number.
         :param issuer_dn: The DN of the certificate issuer
@@ -79,11 +69,19 @@ class EJBCAClient:
             )
 
             if response.status_code == 200:
-                return response.json()
+                data = response.json()
+                return RevocationStatus(
+                    issuer_dn=data.get("issuer_dn"),
+                    serial_number=data.get("serial_number"),
+                    revocation_reason=data.get("revocation_reason"),
+                    revocation_date=data.get("revocation_date"),
+                    message=data.get("message"),
+                    revoked=data.get("revoked")
+                ), None
             elif response.status_code == 404:
-                return {"detail": "Certificate not found or revoked"}
+                return None, {"detail": f"Certificate with serial {cert_serial} not found"}
             else:
-                raise HTTPException(
+                return None, HTTPException(
                     status_code=response.status_code,
                     detail=f"Error fetching revocation status: {response.text}"
                 )
@@ -109,8 +107,17 @@ if __name__ == "__main__":
 
     # Example data for issuer_dn and certificate serial number
     issuer_dn = "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"
-    cert_serial = "19F25BF2ADA9D577BCC1B1CF204CBD8FE5CE0093"
+    cert_serial_1 = "19F25BF2ADA9D577BCC1B1CF204CBD8FE5CE0093"
+    cert_serial = "6e5d703375a5ad8e2132ab0d563a1c34bbd4c534"
 
     # Fetch the revocation status
-    revocation_status = client.get_revocation_status(issuer_dn, cert_serial)
-    print("Revocation Status:", revocation_status)
+    revocation_status, error = client.get_revocation_status(issuer_dn, cert_serial)
+    if error is not None:
+        print ("Error", error)
+    else:
+        if revocation_status.revoked == True:
+            print("Esta revocado")
+        else:
+            print("No lo esta")
+
+        print("Revocation Status:", revocation_status)
