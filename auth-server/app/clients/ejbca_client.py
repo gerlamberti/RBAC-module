@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -35,6 +35,10 @@ class EJBCAClient:
         self.session = requests.Session()
         retries = Retry(total=5, backoff_factor=0.1,
                         status_forcelist=[502, 503, 504])
+        
+        self.session.cert = (self.key_path, self.cert_password)
+        self.session.verify = False
+
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
         # Define the function to log request/response details
@@ -59,14 +63,10 @@ class EJBCAClient:
         :param cert_serial: The serial number of the certificate
         :return: A dictionary containing the revocation status information.
         """
-        url = f"{self.base_url}/ejbca/ejbca-rest-api/v1/certificate/{issuer_dn}/{cert_serial}/revocationstatus"
+        url = f"{self.base_url}/v1/certificate/{issuer_dn}/{cert_serial}/revocationstatus"
 
         try:
-            response = self.session.get(
-                url,
-                cert=(self.key_path, self.cert_password),  # Using the client certificate and password
-                verify=False  # Disable SSL verification for testing (set to True for production)
-            )
+            response = self.session.get(url)
 
             if response.status_code == 200:
                 data = response.json()
@@ -92,6 +92,33 @@ class EJBCAClient:
                 detail=f"Failed to connect to EJBCA for revocation status: {str(e)}"
             )
 
+    def search(self, max_results: int, criteria: List[Dict]) -> Tuple[Dict, object]:
+        """
+        Searches for certificates based on the given criteria.
+
+        Args:
+            max_results (int): Maximum number of results to return.
+            criteria (List[Dict]): List of search criteria dictionaries. Each dictionary should include:
+                - property: (str) Search property (e.g., QUERY, STATUS, etc.)
+                - value: (str) Value for the property.
+                - operation: (str) Operation type (e.g., EQUAL, LIKE, BEFORE, AFTER).
+
+        Returns:
+            Dict: Response from the EJBCA API.
+        """
+        url = f"{self.base_url}/v1/certificate/search"
+        body = {
+            "max_number_of_results": max_results,
+            "criteria": criteria
+        }
+
+        try:
+            response = self.session.post(url, json=body)
+            response.raise_for_status()
+            return response.json(), None
+        except requests.exceptions.RequestException as e:
+            return None, {"error": str(e)}
+        
     def _validate_file(self, file_path: str) -> bool:
         """Check if a given file path exists and is readable."""
         return os.path.isfile(file_path) and os.access(file_path, os.R_OK)
@@ -100,7 +127,7 @@ class EJBCAClient:
 if __name__ == "__main__":
     # Set up the EJBCAClient
     client = EJBCAClient(
-        base_url="https://localhost:8443",  # Replace with your actual EJBCA server URL
+        base_url="https://localhost:8443/ejbca/ejbca-rest-api",  # Replace with your actual EJBCA server URL
         key_path="../../../certs/certificate.pem",  # Path to the .p12 file
         cert_password="../../../certs/private_key_no_passphrase.key"  # Password for the certificate
     )
@@ -121,3 +148,8 @@ if __name__ == "__main__":
             print("No lo esta")
 
         print("Revocation Status:", revocation_status)
+    criteria = [
+        {"property": "QUERY", "value": "6e5d703375a5ad8e2132ab0d563a1c34bbd4c534", "operation": "EQUAL"}
+    ]
+    response = client.search(10, criteria)
+    print(response)
