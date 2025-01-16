@@ -117,7 +117,7 @@ class EJBCAClient:
             response.raise_for_status()
             return response.json(), None
         except requests.exceptions.RequestException as e:
-            return None, {"error": str(e)}
+                return None, {"error": str(e)}
         
     def _validate_file(self, file_path: str) -> bool:
         """Check if a given file path exists and is readable."""
