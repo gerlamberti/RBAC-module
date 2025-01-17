@@ -1,15 +1,13 @@
-import unittest
-from unittest.mock import MagicMock
-from datetime import datetime, timedelta
-
 import pytest
-
+from unittest.mock import MagicMock
+from datetime import datetime, timedelta, timezone
 from app.application.authenticate_service import AuthenticateService
 from app.domain.entities.certificate import Certificate
 
 
-class TestAuthenticateService(unittest.TestCase):
-    def setUp(self):
+class TestAuthenticateService:
+    @pytest.fixture(autouse=True)
+    def set_up(self):
         """
         Set up the test environment with a mocked CertificateRepository
         and an instance of AuthenticateService (SUT).
@@ -17,12 +15,12 @@ class TestAuthenticateService(unittest.TestCase):
         self.certificate_repository = MagicMock()
         self.service = AuthenticateService(self.certificate_repository)
 
-    @pytest.fixture
+    @pytest.fixture()
     def valid_certificate(self):
         return Certificate(
             serial_id="123ABC",
             public_key="test-public-key",
-            expiry_date=datetime.now() + timedelta(minutes=10),
+            expiry_date=datetime.now(timezone.utc) + timedelta(minutes=10),
         )
 
     @pytest.fixture
@@ -30,7 +28,7 @@ class TestAuthenticateService(unittest.TestCase):
         return Certificate(
             serial_id="123ABC",
             public_key="test-public-key",
-            expiry_date=datetime.now() - timedelta(minutes=10),
+            expiry_date=datetime.now(timezone.utc) - timedelta(minutes=10),
         )
 
     def test_authenticate_success(self, valid_certificate):
@@ -39,15 +37,15 @@ class TestAuthenticateService(unittest.TestCase):
         """
         # Arrange
         self.certificate_repository.is_revoked.return_value = (False, None)
-        self.certificate_repository.get_certificate.return_value = valid_certificate
+        self.certificate_repository.get_certificate.return_value = (valid_certificate, None)
 
         # Act
         response, err = self.service.authenticate("123ABC")
 
         # Assert
-        self.assertIsNone(err)
-        self.assertTrue(response.allowed)
-        self.assertEqual(response.public_key, "test-public-key")
+        assert err is None
+        assert response.allowed is True
+        assert response.public_key == "test-public-key"
         self.certificate_repository.is_revoked.assert_called_once_with("123ABC")
         self.certificate_repository.get_certificate.assert_called_once_with("123ABC")
 
@@ -62,8 +60,8 @@ class TestAuthenticateService(unittest.TestCase):
         response, err = self.service.authenticate("123ABC")
 
         # Assert
-        self.assertFalse(response.allowed)
-        self.assertIsNone(response.public_key)
+        assert response.allowed is False
+        assert response.public_key is None
         self.certificate_repository.is_revoked.assert_called_once_with("123ABC")
         self.certificate_repository.get_certificate.assert_not_called()
 
@@ -82,8 +80,8 @@ class TestAuthenticateService(unittest.TestCase):
         response, err = self.service.authenticate("123ABC")
 
         # Assert
-        self.assertFalse(response.allowed)
-        self.assertIsNone(response.public_key)
+        assert response.allowed is False
+        assert response.public_key is None
         self.certificate_repository.is_revoked.assert_called_once_with("123ABC")
         self.certificate_repository.get_certificate.assert_called_once_with("123ABC")
 
@@ -98,8 +96,8 @@ class TestAuthenticateService(unittest.TestCase):
         response, err = self.service.authenticate("123ABC")
 
         # Assert
-        self.assertIsNone(response)
-        self.assertIsNotNone(err)
+        assert response is None
+        assert err is not None
         self.certificate_repository.is_revoked.assert_called_once_with("123ABC")
         self.certificate_repository.get_certificate.assert_not_called()
 
@@ -118,11 +116,7 @@ class TestAuthenticateService(unittest.TestCase):
         response, err = self.service.authenticate("123ABC")
 
         # Assert
-        self.assertIsNone(response)
-        self.assertIsNotNone(err)
+        assert response is None
+        assert err is not None
         self.certificate_repository.is_revoked.assert_called_once_with("123ABC")
         self.certificate_repository.get_certificate.assert_called_once_with("123ABC")
-
-
-if __name__ == "__main__":
-    unittest.main()
