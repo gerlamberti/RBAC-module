@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import datetime, timedelta, timezone
 from app.application.authenticate_service import AuthenticateService
-from app.domain.entities.certificate import Certificate
+from app.domain.entities.certificate import Certificate, SerialNumber
 
 
 class TestAuthenticateService:
@@ -18,7 +18,7 @@ class TestAuthenticateService:
     @pytest.fixture()
     def valid_certificate(self):
         return Certificate(
-            serial_id="123ABC",
+            serial_id=SerialNumber(123),
             public_key="test-public-key",
             expiry_date=datetime.now(timezone.utc) + timedelta(minutes=10),
         )
@@ -26,7 +26,7 @@ class TestAuthenticateService:
     @pytest.fixture
     def expired_certificate(self):
         return Certificate(
-            serial_id="123ABC",
+            serial_id=SerialNumber(123),
             public_key="test-public-key",
             expiry_date=datetime.now(timezone.utc) - timedelta(minutes=10),
         )
