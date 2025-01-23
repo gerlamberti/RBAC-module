@@ -1,3 +1,5 @@
+import logging
+from types import coroutine
 from typing import Tuple
 from app.clients.ejbca_client import EJBCAClient
 from app.domain.entities.certificate import Certificate
@@ -6,44 +8,55 @@ from app.infrastucture.certificate_decoder import CertificateDecoder
 
 
 class CertificateRespositoryImpl(CertificateRepository):
-    def __init__(self,
-                 ejbca_client: EJBCAClient,
-                 certificate_decoder: CertificateDecoder,
-                 ):
+    def __init__(
+        self,
+        ejbca_client: EJBCAClient,
+        certificate_decoder: CertificateDecoder,
+    ):
         self.ejbca_client = ejbca_client
         self.certificate_decoder = certificate_decoder
 
     def is_revoked(self, serial_id) -> Tuple[bool, dict]:
-        revocationStatus, err = self.ejbca_client.getRevocationstatus(
-            serial_id)
-        return revocationStatus.revoked, err
+        issuer_dn = (
+            "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"
+        )
+        revocationStatus, err = self.ejbca_client.get_revocation_status(
+            issuer_dn, serial_id
+        )
+        if err:
+            return None, err
+        return revocationStatus.revoked, None
 
     def get_certificate(self, serial_id) -> Tuple[Certificate, dict]:
-        search_criteria = [{"property": "QUERY",
-                            "value": serial_id,
-                           "operation": "EQUAL"}]
+        search_criteria = [
+            {"property": "QUERY", "value": serial_id, "operation": "EQUAL"}
+        ]
 
-        search_response, err = self.ejbca_client.search(search_criteria)
+        search_response, err = self.ejbca_client.search(
+            max_results=1, criteria=search_criteria
+        )
 
         if err is not None:
-            return None, {"error": f'Fallo busqueda de certificado con serial: {serial_id}',
-                          "cause": err}
-        
+            return None, {
+                "error": f"Fallo busqueda de certificado con serial: {serial_id}",
+                "cause": err,
+            }
+
         try:
-            first_result = search_response["certificates"]["0"]
+            first_result = search_response["certificates"][0]
             serial_id = first_result["serial_number"]
             raw_certificate = first_result["certificate"]
         except KeyError as e:
-            return None, {"error": "No se encontro el certificado",
-                          "cause": e}
-        if (serial_id != serial_id):
-            return None, {"error": "El serial no coincide con el buscado",
-                          "original_serial": serial_id,
-                          "found_serial": serial_id}
-        
+            return None, {"error": "No se encontro el certificado", "cause": e}
+        if serial_id != serial_id:
+            return None, {
+                "error": "El serial no coincide con el buscado",
+                "original_serial": serial_id,
+                "found_serial": serial_id,
+            }
+
         try:
             certificate = self.certificate_decoder.from_raw(raw_certificate)
         except ValueError as e:
-            return None, {"error": "Error al decodificar certificado",
-                          "cause": e}
+            return None, {"error": "Error al decodificar certificado", "cause": e}
         return certificate, None

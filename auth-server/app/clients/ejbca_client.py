@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List, Optional, Dict, Any
 import requests
@@ -21,6 +22,16 @@ class RevocationStatus(BaseModel):
 
 class EJBCAClient:
     def __init__(self, base_url: str, key_path: str, cert_password: str):
+
+        # Configure the root logger
+        logging.basicConfig(
+            level=logging.DEBUG,  # Set to DEBUG to capture detailed request/response logs
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        )
+
+        # Enable logging for requests and urllib3
+        logging.getLogger("urllib3").setLevel(logging.DEBUG)
+
         self.base_url = base_url
         self.key_path = key_path
         self.cert_password = cert_password
@@ -41,21 +52,6 @@ class EJBCAClient:
 
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
-        # Define the function to log request/response details
-        def log_request(response, *args, **kwargs):
-            print(f"Request URL: {response.request.url}")
-            print(f"Request Method: {response.request.method}")
-            print(f"Request Headers: {response.request.headers}")
-            print(f"Request Body: {response.request.body}")
-            print(f"Response Status: {response.status_code}")
-            print(f"Response Headers: {response.headers}")
-            print(f"Response Body: {response.text}")
-            return response
-
-        self.session.hooks['response'] = [log_request]
-
-    
-
     def get_revocation_status(self, issuer_dn: str, cert_serial: str) -> Tuple[RevocationStatus, object]:
         """
         Get the revocation status of a certificate by its serial number.
@@ -63,8 +59,8 @@ class EJBCAClient:
         :param cert_serial: The serial number of the certificate
         :return: A dictionary containing the revocation status information.
         """
-        url = f"{self.base_url}/v1/certificate/{issuer_dn}/{cert_serial}/revocationstatus"
-
+        url = f'{self.base_url}/v1/certificate/{issuer_dn}/{cert_serial}/revocationstatus'
+        print(f'Attemping to connect to {url}')
         try:
             response = self.session.get(url)
 
@@ -128,8 +124,8 @@ if __name__ == "__main__":
     # Set up the EJBCAClient
     client = EJBCAClient(
         base_url="https://localhost:8443/ejbca/ejbca-rest-api",  # Replace with your actual EJBCA server URL
-        key_path="../../../certs/certificate.pem",  # Path to the .p12 file
-        cert_password="../../../certs/private_key_no_passphrase.key"  # Password for the certificate
+        key_path="../../certs/certificate.pem",  # Path to the .p12 file
+        cert_password="../../certs/private_key_no_passphrase.key"  # Password for the certificate
     )
 
     # Example data for issuer_dn and certificate serial number

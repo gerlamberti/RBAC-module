@@ -22,8 +22,8 @@ class CertificateDecoder:
         """
         # Decode Base64
         decoded_cert = base64.b64decode(raw_certificate)
-        certificate_header_label = b'-----BEGIN CERTIFICATE-----\n'
-        certificate_footer_label = b'\n-----END CERTIFICATE-----'
+        certificate_header_label = b"-----BEGIN CERTIFICATE-----\n"
+        certificate_footer_label = b"\n-----END CERTIFICATE-----"
         full_cert = certificate_header_label + decoded_cert + certificate_footer_label
 
         # Parse the certificate using OpenSSL
@@ -35,13 +35,14 @@ class CertificateDecoder:
         # Extract fields
         serial_number = x509.get_serial_number()
         public_key = crypto.dump_publickey(
-            crypto.FILETYPE_PEM, x509.get_pubkey()).decode('utf-8')
+            crypto.FILETYPE_PEM, x509.get_pubkey()
+        ).decode("utf-8")
         expiry_date = datetime.strptime(
-            x509.get_notAfter().decode('utf-8'), "%Y%m%d%H%M%SZ")
-
+            x509.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
+        ).astimezone()
         # Create and return the Certificate entity
         return Certificate(
             serial_id=SerialNumber(serial_number),
             public_key=public_key,
-            expiry_date=expiry_date
+            expiry_date=expiry_date,
         )

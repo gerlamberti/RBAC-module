@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from enum import Enum
 
 class SerialNumber():
     def __init__(self, serial_number: int):
@@ -27,3 +28,7 @@ class Certificate:
         return (f"Certificate(serial_id='{self.serial_id}', "
                 f"public_key='{self.public_key}', "
                 f"expiry_date='{self.expiry_date.isoformat()}')")
+    
+
+class CertError(Enum):
+    CERTIFICATE_NOT_FOUND = "certificate not found"

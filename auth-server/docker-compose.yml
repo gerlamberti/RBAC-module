@@ -4,7 +4,13 @@ services:
   fastapi-auth:
     build: .
     ports:
-      - "8000:8000"
+      - "8888:8888"
     volumes:
       - ./app:/code/app
-    command: ["fastapi", "run", "app/main.py", "--port", "8000", "--workers", "4", "--reload"]
+    command: ["fastapi", "run", "app/main.py",  "--port", "8888", "--workers", "1", "--reload",]
+    networks:
+      - ejbca-shared-network
+
+networks:
+  ejbca-shared-network:
+    external: true
