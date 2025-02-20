@@ -39,7 +39,7 @@ class CertificateDecoder:
         ).decode("utf-8")
         expiry_date = datetime.strptime(
             x509.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
-        ).astimezone()
+        )
         # Create and return the Certificate entity
         return Certificate(
             serial_id=SerialNumber(serial_number),

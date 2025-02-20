@@ -2,6 +2,7 @@ from datetime import datetime
 
 import pytest
 
+from app.domain.entities import certificate
 from app.domain.entities.certificate import Certificate
 from app.infrastucture.certificate_decoder import CertificateDecoder
 

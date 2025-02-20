@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from enum import Enum
 
+from app.domain.entities.x509_public_key import X509PublicKey
+
 class SerialNumber():
     def __init__(self, serial_number: int):
         self.serial_number = serial_number
@@ -10,12 +12,17 @@ class SerialNumber():
 class Certificate:
     def __init__(self, 
                  serial_id: SerialNumber, 
-                 public_key: str, 
+                 public_key: X509PublicKey, 
                  expiry_date: datetime):
+        if not isinstance(public_key, X509PublicKey):
+            raise ValueError("public_key must be an X509PublicKey object")
         if not isinstance(expiry_date, datetime):
             raise ValueError("expiry_date must be a datetime object")
         if not isinstance(serial_id, SerialNumber):
             raise ValueError("serial_id must be a SerialNumber object")
+        # Ensure expiry_date is timezone-aware, otherwise raise an error
+        if expiry_date.tzinfo is None:
+            raise ValueError("expiry_date must be a timezone-aware datetime")
         
         self.serial_id = serial_id
         self.public_key = public_key
