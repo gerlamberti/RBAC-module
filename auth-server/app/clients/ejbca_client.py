@@ -77,11 +77,7 @@ class EJBCAClient:
             elif response.status_code == 404:
                 return None, {"detail": f"Certificate with serial {cert_serial} not found"}
             else:
-                return None, HTTPException(
-                    status_code=response.status_code,
-                    detail=f"Error fetching revocation status: {response.text}"
-                )
-
+                return None, {"error" : response.text}
         except requests.RequestException as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
