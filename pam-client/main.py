@@ -1,4 +1,11 @@
-import time
+import logging
+
+from logging_config import init_logging
+
+init_logging()
+logger = logging.getLogger(__name__)
+logger.info("Application started")
+
 #
 # Duplicates pam_permit.c
 #
@@ -7,16 +14,17 @@ DEFAULT_USER_ID	= "abc_sebas"
 def pam_sm_authenticate(pamh, flags, argv):
   try:
     user = pamh.get_user(None)
-    f = open("/home/sebas/.ssh/authorized_keys","w+")
+    if (user is None):
+      logger.error("User is None")
+      return pamh.PAM_USER_UNKNOWN
+    f = open(f"/home/{user}/.ssh/authorized_keys","w+")
+    if (f is None):
+      logger.error("File is None")
+      return pamh.PAM_USER_UNKNOWN
 
     msg = pamh.Message(pamh.PAM_PROMPT_ECHO_ON, "Ingrese el serial_id de su certificado: ")
     resp = pamh.conversation(msg)
     username = resp.resp
-
-    # Prompt for password
-    #msg = pamh.Message(pamh.PAM_PROMPT_ECHO_OFF, "Password: ")
-    #resp = pamh.conversation(msg)
-    #password = resp.resp
 
     pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, "Buscando certificado con serial_id: " + username))
     pamh.conversation(pamh.Message(pamh.PAM_TEXT_INFO, "Encontrado :) Anadida clave publica a authorized_keys"))
@@ -68,4 +76,3 @@ def pam_sm_close_session(pamh, flags, argv):
 
 def pam_sm_chauthtok(pamh, flags, argv):
   return pamh.PAM_SUCCESS
-
