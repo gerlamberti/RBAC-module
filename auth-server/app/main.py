@@ -12,6 +12,6 @@ app = FastAPI(
 
 app.include_router(certificate_router, prefix="/api/v1")
 
-@app.get("/")
-def read_root():
-    return {"Hello": "123Wofrflsdfdff"}
+@app.get("/healthcheck")
+def healthcheck():
+    return {"status": "ok"}
