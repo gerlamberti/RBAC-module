@@ -39,7 +39,7 @@ class AuthServerClient:
         :param serial_id: The certificate's serial identifier.
         :return: An AuthResponse object representing the authentication result.
         """
-        url = f"{self.base_url}/certificate/{serial_id}/validate"
+        url = f"{self.base_url}/api/v1/certificate/{serial_id}/validate"
         self.logger.debug("Calling auth server endpoint: %s", url)
         try:
             response = self.session.get(url)
@@ -78,11 +78,11 @@ if __name__ == "__main__":
     test_logger = logging.getLogger("AuthServerClientTest")
     
     # Instantiate the client with a sample base URL
-    client = AuthServerClient(base_url="https://authserver.example.com/api", logger=test_logger)
+    client = AuthServerClient(base_url="http://localhost:8888/", logger=test_logger)
     
     # Example call to the authenticate method
     try:
-        auth_result = client.authenticate("sample_serial_id")
+        auth_result = client.authenticate("1eb97febf0e01bb7f1891cbd837087af3064740b")
         test_logger.info("Authentication result: %s", auth_result)
     except HTTPException as exc:
         test_logger.error("Authentication failed: %s", exc.detail)
