@@ -1,0 +1,9 @@
+[2025-02-22 19:54:40,583] INFO in main: Application started
+[2025-02-22 19:54:40,585] DEBUG in main: AuthServerClient initialized with base_url: http://localhost:8888
+[2025-02-22 19:54:40,585] DEBUG in main: AuthServerClient initialized with base_url: http://localhost:8888
+[2025-02-22 19:54:40,586] DEBUG in main: Calling auth server endpoint: http://localhost:8888/api/v1/certificate/1eb97febf0e01bb7f1891cbd837087af3064740b/validate
+[2025-02-22 19:54:40,588] DEBUG in connectionpool: Starting new HTTP connection (1): localhost:8888
+[2025-02-22 19:54:41,227] DEBUG in connectionpool: http://localhost:8888 "GET /api/v1/certificate/1eb97febf0e01bb7f1891cbd837087af3064740b/validate HTTP/1.1" 200 492
+[2025-02-22 19:54:41,228] DEBUG in main: Received response with status code: 200
+[2025-02-22 19:54:41,229] INFO in main: Certificate 1eb97febf0e01bb7f1891cbd837087af3064740b validated successfully.
+[2025-02-22 19:54:41,229] INFO in main: Authentication result: allowed=True public_key='-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzMC2Xq0l32E9fs3AxySJ\njlvosxBDsSpIV79WYF2XoEJnbGiJ6poJDM6LWupAjjqIuaRPq41LUeLu9ozb9Ncw\nmnpHQ6BD5Y0FoM+u08rfk6xAp/q1wCKf73YN13+a4kAvJx/P69+kLz+DZ/YidZwz\nHZiwh5iiqxGV7UYlFImc5X9oP535fdB/kfi/ITxPqwH7s5MoIXoy+eR/kWIcgi4l\n/iu69wIYtM3llFQW+u9Gd/kY1KfzUBXR0FRIL6QfZNwQsy8rQYLBmy9Tfqrw5ywX\n+OTtwRF0gGz7dFz77qNz4VnOYoBtBXrr0KPByaMChdUbKaGRIxPXTFD5rwOs3IWt\noQIDAQAB\n-----END PUBLIC KEY-----\n'
