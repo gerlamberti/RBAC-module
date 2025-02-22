@@ -1,12 +1,13 @@
 from typing import Optional, Tuple
 
+from pydantic import BaseModel
+
 from app.domain.repositories.certificate_repository import CertificateRepository
 
+class AuthResponse(BaseModel):
+    allowed: bool
+    public_key: Optional[str] = None
 
-class AuthResponse:
-    def __init__(self, allowed: bool, public_key: Optional[str] = None):
-        self.allowed = allowed
-        self.public_key = public_key
 
 
 class AuthenticateService:
@@ -29,4 +30,4 @@ class AuthenticateService:
             print("Certificate is expired")
             return AuthResponse(allowed=False), None
 
-        return AuthResponse(allowed=True, public_key=certificate.public_key), None
+        return AuthResponse(allowed=True, public_key=certificate.public_key.pem_key), None

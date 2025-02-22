@@ -44,15 +44,15 @@ class CertificateRespositoryImpl(CertificateRepository):
 
         try:
             first_result = search_response["certificates"][0]
-            serial_id = first_result["serial_number"]
+            found_serial_id = first_result["serial_number"]
             raw_certificate = first_result["certificate"]
         except KeyError as e:
             return None, {"error": "No se encontro el certificado", "cause": e}
-        if serial_id != serial_id:
+        if serial_id.upper() != found_serial_id.upper():
             return None, {
                 "error": "El serial no coincide con el buscado",
                 "original_serial": serial_id,
-                "found_serial": serial_id,
+                "found_serial": found_serial_id,
             }
 
         try:

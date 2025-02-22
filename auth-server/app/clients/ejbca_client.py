@@ -79,9 +79,10 @@ class EJBCAClient:
             else:
                 return None, {"error" : response.text}
         except requests.RequestException as e:
+            print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to connect to EJBCA for revocation status: {str(e)}"
+                detail=f"Failed to connect to EJBCA for {url}: {str(e)}"
             )
 
     def search(self, max_results: int, criteria: List[Dict]) -> Tuple[Dict, object]:

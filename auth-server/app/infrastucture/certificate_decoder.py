@@ -1,9 +1,10 @@
 import base64
 from typing import Callable
 from OpenSSL import crypto
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.domain.entities.certificate import Certificate, SerialNumber
+from app.domain.entities.x509_public_key import X509PublicKey
 
 
 class CertificateDecoder:
@@ -39,10 +40,10 @@ class CertificateDecoder:
         ).decode("utf-8")
         expiry_date = datetime.strptime(
             x509.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
-        )
+        ).astimezone(timezone.utc)
         # Create and return the Certificate entity
         return Certificate(
             serial_id=SerialNumber(serial_number),
-            public_key=public_key,
+            public_key=X509PublicKey(public_key),
             expiry_date=expiry_date,
         )
