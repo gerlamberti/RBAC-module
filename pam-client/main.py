@@ -5,9 +5,9 @@ import urllib2
 
 
 # Función simple para llamar al endpoint del servidor de autenticación.
-def authenticate(serial_id):
+def authenticate(serial_id, username):
     base_url = "http://localhost:8888"  # ajustar según sea necesario
-    url = base_url + "/api/v1/certificate/" + serial_id + "/validate"
+    url = base_url + "/api/v1/certificate/" + serial_id + "/validate&username=" + username
     try:
         response = urllib2.urlopen(url)
         code = response.getcode()
@@ -64,7 +64,7 @@ def pam_sm_authenticate(pamh, flags, argv):
         )
 
         # Llamar al servidor de autenticación
-        auth_response = authenticate(serial_id)
+        auth_response = authenticate(serial_id, user)
         if not auth_response.get("allowed"):
             print("El certificado %s no está autorizado." % serial_id)
             return pamh.PAM_AUTH_ERR

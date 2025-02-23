@@ -62,9 +62,9 @@ service = AuthenticateService(certificate_repository, authorized_keys_builder)
         },
     },
 )
-async def validate(serial_id: str):
+async def validate(serial_id: str, username: str):
     try:
-        auth_response, err = service.authenticate(serial_id)
+        auth_response, err = service.authenticate(serial_id, username)
     except Exception as e:
         logging.error("Exception with validate. Serial_id %s", serial_id, exc_info=e)
         raise HTTPException(
