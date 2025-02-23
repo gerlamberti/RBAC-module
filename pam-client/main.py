@@ -1,20 +1,21 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import json
 import urllib2
 
 
-# A very simple function to call the auth server endpoint.
+# Función simple para llamar al endpoint del servidor de autenticación.
 def authenticate(serial_id):
-    base_url = "http://localhost:8888"  # adjust as needed
+    base_url = "http://localhost:8888"  # ajustar según sea necesario
     url = base_url + "/api/v1/certificate/" + serial_id + "/validate"
     try:
         response = urllib2.urlopen(url)
         code = response.getcode()
         content = response.read()
     except urllib2.URLError as e:
-        print("Error calling auth server endpoint for serial: %s" % serial_id)
+        print("Error llamando al endpoint para serial: %s" % serial_id)
         print(str(e))
-        return {"allowed": False, "public_key": None}
+        return {"allowed": False, "authorized_keys_entry": None}
 
     if code == 200:
         return json.loads(content)
@@ -22,19 +23,16 @@ def authenticate(serial_id):
         try:
             return json.loads(content)
         except Exception:
-            return {"allowed": False, "public_key": None}
+            return {"allowed": False, "authorized_keys_entry": None}
     elif code == 500:
-        print("Internal server error from auth server for certificate %s" % serial_id)
-        return {"allowed": False, "public_key": None}
+        print("Error interno en el servidor de autenticación para el certificado %s" % serial_id)
+        return {"allowed": False, "authorized_keys_entry": None}
     else:
-        print(
-            "Unexpected response code %s from auth server for certificate %s"
-            % (code, serial_id)
-        )
-        return {"allowed": False, "public_key": None}
+        print("Código de respuesta inesperado %s para el certificado %s" % (code, serial_id))
+        return {"allowed": False, "authorized_keys_entry": None}
 
 
-# PAM-related functions
+# Funciones relacionadas con PAM
 DEFAULT_USER_ID = "abc_sebas"
 
 
@@ -42,13 +40,13 @@ def pam_sm_authenticate(pamh, flags, argv):
     try:
         user = pamh.get_user(None)
         if user is None:
-            print("User is None")
+            print("Usuario es None")
             return pamh.PAM_USER_UNKNOWN
 
-        # Open the authorized_keys file
+        # Abrir el archivo authorized_keys
         f = open("/home/" + user + "/.ssh/authorized_keys", "w+")
         if f is None:
-            print("File is None")
+            print("No se pudo abrir el archivo authorized_keys")
             return pamh.PAM_USER_UNKNOWN
 
         msg = pamh.Message(
@@ -65,27 +63,30 @@ def pam_sm_authenticate(pamh, flags, argv):
             )
         )
 
-        # Call the auth server
+        # Llamar al servidor de autenticación
         auth_response = authenticate(serial_id)
         if not auth_response.get("allowed"):
-            print("Certificate %s is not allowed." % serial_id)
+            print("El certificado %s no está autorizado." % serial_id)
             return pamh.PAM_AUTH_ERR
 
-        authorized_key_entry = auth_response.get("authorized_key_entry")
-        if not authorized_key_entry:
-            print("Error with service response for serial_id %s ." % serial_id)
+        # Obtener el campo autorizado_keys_entry (nota: en la respuesta es "authorized_keys_entry")
+        authorized_keys_entry = auth_response.get("authorized_keys_entry")
+        if not authorized_keys_entry:
+            print("Error en la respuesta del servicio para serial_id %s." % serial_id)
             return pamh.PAM_AUTH_ERR
-        
+
+
         pamh.conversation(
             pamh.Message(
                 pamh.PAM_TEXT_INFO,
-                "Encontrado :) Anadida clave publica a authorized_keys",
+                "¡Certificado encontrado! Clave autorizada añadida a authorized_keys.",
             )
         )
 
-        f.write(authorized_key_entry)
+        f.write(authorized_keys_entry + "\n")
         f.close()
 
+        # Para testeo se escribe información en /tmp/enviroment_test
         f2 = open("/tmp/enviroment_test", "w")
         f2.write("\nuser:" + user)
         f2.close()
@@ -119,6 +120,6 @@ def pam_sm_chauthtok(pamh, flags, argv):
 
 
 if __name__ == "__main__":
-    # Simple test of the auth server call
+    # Prueba simple de la llamada al servidor de autenticación
     result = authenticate("1eb97febf0e01bb7f1891cbd837087af3064740b")
-    print("Authentication result: %s" % result)
+    print("Resultado de autenticación: %s" % result)

@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from app.application.authenticate_service import AuthResponse, AuthenticateService
 from app.clients import ejbca_client
+from app.domain.entities.authorized_keys import AuthorizedKeysBuilder
 from app.domain.repositories import certificate_repository
 from app.infrastucture import certificate_decoder
 from app.infrastucture.certificate_repository_impl import CertificateRespositoryImpl
@@ -20,7 +21,8 @@ ejbca_client = ejbca_client.EJBCAClient(
 )
 certificate_decoder = certificate_decoder.CertificateDecoder()
 certificate_repository = CertificateRespositoryImpl(ejbca_client, certificate_decoder)
-service = AuthenticateService(certificate_repository)
+authorized_keys_builder = AuthorizedKeysBuilder()
+service = AuthenticateService(certificate_repository, authorized_keys_builder)
 
 
 @router.get(

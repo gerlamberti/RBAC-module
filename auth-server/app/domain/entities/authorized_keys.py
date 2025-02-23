@@ -1,7 +1,4 @@
-
-
 from app.domain.entities.x509_public_key import X509PublicKey
-
 
 class AuthorizedKeysBuilder:
     def __init__(self):
@@ -20,6 +17,6 @@ class AuthorizedKeysBuilder:
                 ssh_public_key (str): public key of the user in ssh compatible format.
             Example: environment="REMOTEUSER=german.lamberti" ssh-rsa AAAAB3NzaC1.....shortened== german.lamberti@unc.edu.ar
         """
-        enviroment = f"\"REMOTEUSER={commonName}|{role}\""
+        environment = f"REMOTEUSER={commonName}|{role}"
         key = public_key.to_ssh_public_key()
-        return f"{enviroment} {key} {emailAddress}"
+        return f"environment=\"{environment}\" {key} {emailAddress}"

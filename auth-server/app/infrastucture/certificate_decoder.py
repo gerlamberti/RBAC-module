@@ -45,7 +45,7 @@ class CertificateDecoder:
         ).astimezone(timezone.utc)
 
         
-        subject_components = x509.get_subject()
+        subject_components = x509.get_subject().get_components()
         subject_components_dict = {key.decode(): value.decode() for key, value in subject_components}
 
         # Create and return the Certificate entity
