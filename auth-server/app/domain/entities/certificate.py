@@ -13,7 +13,9 @@ class Certificate:
     def __init__(self, 
                  serial_id: SerialNumber, 
                  public_key: X509PublicKey, 
-                 expiry_date: datetime):
+                 expiry_date: datetime,
+                 subject_components: list[tuple[bytes, bytes]]
+                 ):
         if not isinstance(public_key, X509PublicKey):
             raise ValueError("public_key must be an X509PublicKey object")
         if not isinstance(expiry_date, datetime):
@@ -27,6 +29,7 @@ class Certificate:
         self.serial_id = serial_id
         self.public_key = public_key
         self.expiry_date = expiry_date
+        self.subject_components = subject_components
 
     def is_expired(self, now: datetime = datetime.now(timezone.utc)) -> bool:
         return now > self.expiry_date
