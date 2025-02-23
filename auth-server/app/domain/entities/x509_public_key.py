@@ -13,6 +13,8 @@ class X509PublicKey:
         self._validate_pem_format(pem_key)
         self._validate_crypto_structure(pem_key)
         self.pem_key = pem_key  # Store valid PEM key
+        # Store the parsed key object for later use
+        self._key_obj = serialization.load_pem_public_key(pem_key.encode())
 
     def _validate_pem_format(self, pem_key: str):
         """Ensure the key is in valid PEM format."""
@@ -30,6 +32,20 @@ class X509PublicKey:
         except (ValueError, InvalidKey):
             raise ValueError("Invalid X.509 public key: cannot be parsed")
 
+    def to_ssh_public_key(self) -> str:
+        """
+        Converts the RSA PEM public key to the OpenSSH public key format.
+
+        :return: A string containing the SSH public key (e.g., "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ...")
+        :raises ValueError: if the key is not an RSA key.
+        """
+        if not isinstance(self._key_obj, rsa.RSAPublicKey):
+            raise ValueError("SSH public key conversion is supported only for RSA keys")
+        ssh_bytes = self._key_obj.public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH
+        )
+        return ssh_bytes.decode('utf-8')
+
     def __repr__(self) -> str:
         return f"X509PublicKey(pem_key='{self.pem_key[:30]}...')"  # Truncated for readability
-

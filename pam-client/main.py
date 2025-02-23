@@ -71,6 +71,11 @@ def pam_sm_authenticate(pamh, flags, argv):
             print("Certificate %s is not allowed." % serial_id)
             return pamh.PAM_AUTH_ERR
 
+        authorized_key_entry = auth_response.get("authorized_key_entry")
+        if not authorized_key_entry:
+            print("Error with service response for serial_id %s ." % serial_id)
+            return pamh.PAM_AUTH_ERR
+        
         pamh.conversation(
             pamh.Message(
                 pamh.PAM_TEXT_INFO,
@@ -78,9 +83,7 @@ def pam_sm_authenticate(pamh, flags, argv):
             )
         )
 
-        f.write(
-            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHDzwbYUjqoUwpfjHvBmOAsDqJKAl+hqVEkUvqC5dYUt bruno178pm@gmail.com"
-        )
+        f.write(authorized_key_entry)
         f.close()
 
         f2 = open("/tmp/enviroment_test", "w")
