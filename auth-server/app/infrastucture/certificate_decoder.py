@@ -44,14 +44,16 @@ class CertificateDecoder:
             x509.get_notAfter().decode("utf-8"), "%Y%m%d%H%M%SZ"
         ).astimezone(timezone.utc)
 
-        subject = x509.get_subject()
-        print(subject.get_components())
+        
+        subject_components = x509.get_subject()
+        subject_components_dict = {key.decode(): value.decode() for key, value in subject_components}
+
         # Create and return the Certificate entity
         return Certificate(
             serial_id=SerialNumber(serial_number),
             public_key=X509PublicKey(public_key),
             expiry_date=expiry_date,
-            subject_components = subject.get_components()
+            subject_components = subject_components_dict
         )
 # for testing pourposes
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ class Certificate:
                  serial_id: SerialNumber, 
                  public_key: X509PublicKey, 
                  expiry_date: datetime,
-                 subject_components: list[tuple[bytes, bytes]]
+                 subject_components: dict[str, str]
                  ):
         if not isinstance(public_key, X509PublicKey):
             raise ValueError("public_key must be an X509PublicKey object")
