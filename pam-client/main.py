@@ -7,7 +7,7 @@ import urllib2
 # Función simple para llamar al endpoint del servidor de autenticación.
 def authenticate(serial_id, username):
     base_url = "http://localhost:8888"  # ajustar según sea necesario
-    url = base_url + "/api/v1/certificate/" + serial_id + "/validate&username=" + username
+    url = base_url + "/api/v1/certificate/" + serial_id + "/validate?username=" + username
     try:
         response = urllib2.urlopen(url)
         code = response.getcode()
@@ -112,6 +112,18 @@ def pam_sm_open_session(pamh, flags, argv):
 
 
 def pam_sm_close_session(pamh, flags, argv):
+    user = pamh.get_user(None)
+    if user is None:
+        print("Usuario es None")
+        return pamh.PAM_USER_UNKNOWN
+
+    # Abrir el archivo authorized_keys
+    f = open("/home/" + user + "/.ssh/authorized_keys", "w+")
+    f.write("")
+    f.close()
+    if f is None:
+        print("No se pudo abrir el archivo authorized_keys")
+
     return pamh.PAM_SUCCESS
 
 
