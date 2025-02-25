@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   test-runner:
-    build: ./Dockerfile.ci
+    build:
+      context: .
+      dockerfile: ci.Dockerfile
     volumes:
       - ./app:/code/app
       - ./coverage-reports:/code/coverage-reports  # Mount for persistence
