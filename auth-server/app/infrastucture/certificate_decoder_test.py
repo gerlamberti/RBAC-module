@@ -1,8 +1,7 @@
-from datetime import datetime
+from datetime import timezone, datetime
 
 import pytest
 
-from app.domain.entities import certificate
 from app.domain.entities.certificate import Certificate
 from app.infrastucture.certificate_decoder import CertificateDecoder
 
@@ -26,7 +25,7 @@ NQIDAQAB
                                     day=7,
                                     hour=2,
                                     minute=46,
-                                    second=52)
+                                    second=52).astimezone(timezone.utc)
 
     # Act
     certificate = CertificateDecoder().from_raw(raw_certificate)
@@ -36,7 +35,7 @@ NQIDAQAB
         certificate, Certificate), "Result should be a Certificate entity"
     assert certificate.serial_id.to_hex_uppercase(
     ) == expected_serial_id, "Serial ID mismatch"
-    assert certificate.public_key == expected_public_key, "Public key mismatch"
+    assert certificate.public_key.pem_key == expected_public_key, "Public key mismatch"
     assert certificate.expiry_date == expected_expiry_date, "Expiry date mismatch"
 
 

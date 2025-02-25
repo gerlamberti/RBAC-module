@@ -8,11 +8,15 @@ from app.domain.entities.x509_public_key import X509PublicKey
 
 def test_invalid_public_key():
     # Act
+    invalid_pk = "123"
     with pytest.raises(ValueError) as e:
-        certificate = Certificate(
+         Certificate(
             serial_id=SerialNumber(123456),
-            public_key="123",
+            public_key=invalid_pk,
             expiry_date=valid_expiry_date(),
+            subject_components={"emailAddress": "test-email",
+                                "CN": "test-CN",
+                                "role": "test-role"}
         )
     # Assert
     assert str(
@@ -26,6 +30,7 @@ def test_invalid_serial_id():
             serial_id="invalid_serial_id",
             public_key=Mock(spec=X509PublicKey),
             expiry_date=valid_expiry_date(),
+            subject_components={}
         )
     # Assert
     assert str(
@@ -39,6 +44,7 @@ def test_naive_expiry_date():
             serial_id=SerialNumber(123456),
             public_key=Mock(spec=X509PublicKey),
             expiry_date=datetime.now(),
+            subject_components={}
         )
     # Assert
     assert str(
@@ -51,11 +57,14 @@ def test_valid_certificate():
         serial_id=SerialNumber(123456),
         public_key=Mock(spec=X509PublicKey),
         expiry_date=valid_expiry_date(),
+        subject_components={ "emailAddress": "test-email",
+                             "CN": "test-CN",
+                             "role": "test-role"}
     )
     # Assert
     assert certificate.is_expired() == False, "Certificate should not be expired"
 
-    # Helper function to return a valid expiry date
+# Helper function to return a valid expiry date
 
-    def valid_expiry_date():
-        return datetime.now(timezone.utc) + timedelta(days=1)
+def valid_expiry_date():
+    return datetime.now(timezone.utc) + timedelta(days=1)

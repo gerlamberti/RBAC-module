@@ -35,7 +35,7 @@ class Certificate:
         return now > self.expiry_date
 
     def __repr__(self) -> str:
-        return (f"Certificate(serial_id='{self.serial_id}', "
+        return (f"Certificate(serial_id='{self.serial_id.serial_number}', "
                 f"public_key='{self.public_key}', "
                 f"expiry_date='{self.expiry_date.isoformat()}')")
     
