@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage-reports
+          path: ./auth-server/coverage-reports
 
       - name: Cleanup Docker Containers and Volumes
         run: docker compose -f auth-server/docker-compose.ci.yml down -v
