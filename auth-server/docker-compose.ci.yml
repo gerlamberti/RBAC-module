@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  test-runner:
+    build: .
+    volumes:
+      - ./app:/code/app
+      - ./coverage-reports:/code/coverage-reports  # Mount for persistence
+    command: ["pytest", "--disable-warnings", "--cov=.","--cov-report=html:/code/coverage-reports"]
+    networks:
+      - ejbca-shared-network
+
+networks:
+  ejbca-shared-network:
+    external: true
