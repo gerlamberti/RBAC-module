@@ -1,5 +1,3 @@
-import logging
-from types import coroutine
 from typing import Tuple
 from app.clients.ejbca_client import EJBCAClient
 from app.domain.entities.certificate import Certificate
@@ -46,6 +44,8 @@ class CertificateRespositoryImpl(CertificateRepository):
             first_result = search_response["certificates"][0]
             found_serial_id = first_result["serial_number"]
             raw_certificate = first_result["certificate"]
+        except IndexError as e:
+            return None, {"error": "No se encontraron certificados", "cause": e}
         except KeyError as e:
             return None, {"error": "No se encontro el certificado", "cause": e}
         if serial_id.upper() != found_serial_id.upper():
