@@ -1,12 +1,12 @@
 import logging
 import os
-from typing import List, Optional, Dict, Any
+from typing import Dict, List, Optional, Tuple
+
 import requests
+from pydantic import BaseModel
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from fastapi import HTTPException, status
-from pydantic import BaseModel
-from typing import Tuple
+
 
 class RevocationStatus(BaseModel):
     """
@@ -21,16 +21,15 @@ class RevocationStatus(BaseModel):
 
 
 class EJBCAClient:
-    def __init__(self, base_url: str, key_path: str, cert_password: str):
+    """ A client to interact with the EJBCA REST API. """
 
-        # Configure the root logger
-        logging.basicConfig(
-            level=logging.DEBUG,  # Set to DEBUG to capture detailed request/response logs
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
-
-        # Enable logging for requests and urllib3
-        logging.getLogger("urllib3").setLevel(logging.DEBUG)
+    def __init__(self, base_url: str,
+                 key_path: str,
+                 cert_password: str,
+                 logger: logging.Logger = logging.getLogger(__name__),
+                 session: requests.Session = requests.Session()):
+        self.logger = logger
+        self.logger.name = __name__
 
         self.base_url = base_url
         self.key_path = key_path
@@ -43,10 +42,10 @@ class EJBCAClient:
             raise ValueError(f"Key file not found: {self.key_path}")
 
         # Set up a session with retries
-        self.session = requests.Session()
+        self.session = session
         retries = Retry(total=5, backoff_factor=0.1,
                         status_forcelist=[502, 503, 504])
-        
+
         self.session.cert = (self.key_path, self.cert_password)
         self.session.verify = False
 
@@ -60,7 +59,7 @@ class EJBCAClient:
         :return: A dictionary containing the revocation status information.
         """
         url = f'{self.base_url}/v1/certificate/{issuer_dn}/{cert_serial}/revocationstatus'
-        print(f'Attemping to connect to {url}')
+        self.logger.info(f'Attemping to connect to {url}')
         try:
             response = self.session.get(url)
 
@@ -77,13 +76,9 @@ class EJBCAClient:
             elif response.status_code == 404:
                 return None, {"detail": f"Certificate with serial {cert_serial} not found"}
             else:
-                return None, {"error" : response.text}
+                return None, {"error": response.text}
         except requests.RequestException as e:
-            print(e)
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to connect to EJBCA for {url}: {str(e)}"
-            )
+            return None, {"error": str(e), "url": url}
 
     def search(self, max_results: int, criteria: List[Dict]) -> Tuple[Dict, object]:
         """
@@ -107,42 +102,13 @@ class EJBCAClient:
 
         try:
             response = self.session.post(url, json=body)
-            response.raise_for_status()
-            return response.json(), None
+            if response.status_code == 200:
+                return response.json(), None
+            else:
+                return None, {"error": response.text, "url": url, "error_code": response.status_code}
         except requests.exceptions.RequestException as e:
-                return None, {"error": str(e)}
-        
+            return None, {"error": str(e), "url": url}
+
     def _validate_file(self, file_path: str) -> bool:
         """Check if a given file path exists and is readable."""
         return os.path.isfile(file_path) and os.access(file_path, os.R_OK)
-
-
-if __name__ == "__main__":
-    # Set up the EJBCAClient
-    client = EJBCAClient(
-        base_url="https://localhost:8443/ejbca/ejbca-rest-api",  # Replace with your actual EJBCA server URL
-        key_path="../../certs/certificate.pem",  # Path to the .p12 file
-        cert_password="../../certs/private_key_no_passphrase.key"  # Password for the certificate
-    )
-
-    # Example data for issuer_dn and certificate serial number
-    issuer_dn = "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"
-    cert_serial_1 = "19F25BF2ADA9D577BCC1B1CF204CBD8FE5CE0093"
-    cert_serial = "6e5d703375a5ad8e2132ab0d563a1c34bbd4c534"
-
-    # Fetch the revocation status
-    revocation_status, error = client.get_revocation_status(issuer_dn, cert_serial)
-    if error is not None:
-        print ("Error", error)
-    else:
-        if revocation_status.revoked == True:
-            print("Esta revocado")
-        else:
-            print("No lo esta")
-
-        print("Revocation Status:", revocation_status)
-    criteria = [
-        {"property": "QUERY", "value": "6e5d703375a5ad8e2132ab0d563a1c34bbd4c534", "operation": "EQUAL"}
-    ]
-    response = client.search(10, criteria)
-    print(response)
