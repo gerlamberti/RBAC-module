@@ -3,18 +3,11 @@ import logging
 import os
 
 from fastapi import FastAPI
-from app.core.load_config import load_config
+from app.core.config import get_config
+from app.core.config.load_config import load_config
 from app.routes.certificate_route import router as certificate_router
 
-
-@lru_cache
-def get_config() -> dict:
-    config, err = load_config(project_path=os.getcwd())
-    if err:
-        raise err
-    return config
-
-
+os.environ["PROJECT_PATH"] = os.getcwd()
 app = FastAPI(
     title="Certificate Validation API",
     description="Se usa esta API para validar que certificados emitidos por EJBCA son válidos. También permite verificar si un certificado ha sido revocado.",

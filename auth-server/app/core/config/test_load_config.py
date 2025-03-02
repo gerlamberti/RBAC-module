@@ -3,7 +3,7 @@ import tempfile
 import pytest
 import yaml
 
-from app.core.load_config import load_config
+from app.core.config.load_config import load_config
 
 
 @pytest.fixture

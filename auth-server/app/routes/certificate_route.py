@@ -3,11 +3,11 @@ import logging
 from app.application.authenticate_service import (AuthenticateService,
                                                   AuthResponse)
 from app.clients.ejbca_client import EJBCAClient
+from app.core.config.get_config import get_config
 from app.domain.entities.authorized_keys import AuthorizedKeysBuilder
 from app.infrastucture.certificate_decoder import CertificateDecoder
 from app.infrastucture.certificate_repository_impl import \
     CertificateRespositoryImpl
-from app.main import get_config
 from fastapi import APIRouter, Depends, HTTPException, status
 
 router = APIRouter()
@@ -90,6 +90,8 @@ def validate(
             detail=str(e)
         ) from e
 
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logging.exception(
             "Unexpected error while processing serial_id %s", serial_id)
