@@ -1,9 +1,10 @@
+import logging
 from typing import Optional, Tuple
 
-from pydantic import BaseModel
-
 from app.domain.entities.authorized_keys import AuthorizedKeysBuilder
-from app.domain.repositories.certificate_repository import CertificateRepository
+from app.domain.repositories.certificate_repository import \
+    CertificateRepository
+from pydantic import BaseModel
 
 
 class AuthResponse(BaseModel):
@@ -14,9 +15,11 @@ class AuthResponse(BaseModel):
 class AuthenticateService:
     def __init__(self,
                  certificate_repository: CertificateRepository,
-                 authorized_keys_builder: AuthorizedKeysBuilder):
+                 authorized_keys_builder: AuthorizedKeysBuilder,
+                 logger: logging.Logger = logging.getLogger(__name__)):
         self.certificate_repository = certificate_repository
         self.authorized_keys_builder = authorized_keys_builder
+        self.logger = logger
 
     def authenticate(self, serial_id: str, username: str) -> Tuple[AuthResponse, dict]:
         isRevoked, err = self.certificate_repository.is_revoked(serial_id)
@@ -32,10 +35,11 @@ class AuthenticateService:
             return None, {"error": "get_certificate failed", "detail": err}
 
         if certificate.is_expired():
-            print("Certificate is expired")
+            self.logger.info("Certificate is expired")
             return AuthResponse(allowed=False), None
-        print("Certificate role: ", certificate.subject_components["role"])
-        print("Username: ", username)
+        self.logger.debug("Certificate role: %s",
+                          certificate.subject_components["role"])
+        self.logger.debug("Username: %s", username)
         if certificate.subject_components["role"] != username:
             return AuthResponse(allowed=False), None
         try:

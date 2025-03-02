@@ -22,13 +22,3 @@ def load_config(project_path: str) -> Tuple[dict, Exception]:
         return config, None
     except (IOError, yaml.YAMLError) as e:
         return None, e
-
-
-# Example usage (if running standalone)
-if __name__ == "__main__":
-    config, err = load_config(project_path="/Users/bruno/Programacion/ejbca-tesis/auth-server")
-    print(f"Loaded configuration for {os.getenv('ENV', 'local')}")
-    if err:
-        print(f"Error loading configuration: {err}")
-    else:
-        print(config)
