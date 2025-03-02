@@ -1,7 +1,9 @@
 from typing import Tuple
+
 from app.clients.ejbca_client import EJBCAClient
 from app.domain.entities.certificate import Certificate
-from app.domain.repositories.certificate_repository import CertificateRepository
+from app.domain.repositories.certificate_repository import \
+    CertificateRepository
 from app.infrastucture.certificate_decoder import CertificateDecoder
 
 
@@ -10,16 +12,15 @@ class CertificateRespositoryImpl(CertificateRepository):
         self,
         ejbca_client: EJBCAClient,
         certificate_decoder: CertificateDecoder,
+        issuer_dn: str,
     ):
         self.ejbca_client = ejbca_client
         self.certificate_decoder = certificate_decoder
+        self.issuer_dn = issuer_dn
 
     def is_revoked(self, serial_id) -> Tuple[bool, dict]:
-        issuer_dn = (
-            "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"
-        )
         revocationStatus, err = self.ejbca_client.get_revocation_status(
-            issuer_dn, serial_id
+            self.issuer_dn, serial_id
         )
         if err:
             return None, err

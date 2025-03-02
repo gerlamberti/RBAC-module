@@ -18,11 +18,14 @@ def certificate_decoder():
     """Mock del decodificador de certificados."""
     return MagicMock(spec=CertificateDecoder)
 
+@pytest.fixture
+def mock_issuer_dn():
+    return "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"
 
 @pytest.fixture
-def repository(ejbca_client, certificate_decoder):
+def repository(ejbca_client, certificate_decoder, mock_issuer_dn):
     """Instancia del repositorio con dependencias mockeadas."""
-    return CertificateRespositoryImpl(ejbca_client, certificate_decoder)
+    return CertificateRespositoryImpl(ejbca_client, certificate_decoder, mock_issuer_dn)
 
 
 @pytest.fixture
@@ -31,7 +34,6 @@ def mock_certificate():
     cert = MagicMock(spec=Certificate)
     cert.serial_id = "123ABC"
     return cert
-
 
 # --- PRUEBAS PARA is_revoked ---
 

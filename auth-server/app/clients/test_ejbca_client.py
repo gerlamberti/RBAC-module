@@ -39,7 +39,7 @@ def ejbca_client(mock_session, temp_cert_files):
     key_path, cert_path = temp_cert_files
     return EJBCAClient(
         base_url="https://ejbca.example.com",
-        key_path=key_path,
+        certificate_path=key_path,
         cert_password=cert_path,
         session=mock_session
     )

@@ -1,0 +1,5 @@
+ejbca:
+  base_url: "https://ejbca-bitnami_ejbca_1:8443/ejbca/ejbca-rest-api"
+  certificate_path: "/auth-server/certs/certificate.pem"
+  cert_password: "/auth-server/certs/private_key_no_passphrase.key"
+  issuer_dn: "UID=c-CEJHfOUpRPS3Ms3gWyMJqCax3aoXmCwu,CN=ManagementCA,O=Example%20CA,C=SE"

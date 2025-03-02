@@ -24,7 +24,7 @@ class EJBCAClient:
     """ A client to interact with the EJBCA REST API. """
 
     def __init__(self, base_url: str,
-                 key_path: str,
+                 certificate_path: str,
                  cert_password: str,
                  logger: logging.Logger = logging.getLogger(__name__),
                  session: requests.Session = requests.Session()):
@@ -32,7 +32,7 @@ class EJBCAClient:
         self.logger.name = __name__
 
         self.base_url = base_url
-        self.key_path = key_path
+        self.key_path = certificate_path
         self.cert_password = cert_password
 
         # Validate that both certificate and key paths exist

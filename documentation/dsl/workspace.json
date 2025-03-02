@@ -1,0 +1,255 @@
+{
+  "configuration" : { },
+  "description" : "Description",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedAgent" : "structurizr-ui",
+  "lastModifiedDate" : "2025-02-28T01:34:28Z",
+  "model" : {
+    "people" : [ {
+      "id" : "1",
+      "location" : "Unspecified",
+      "name" : "Usuario final",
+      "properties" : {
+        "structurizr.dsl.identifier" : "user"
+      },
+      "relationships" : [ {
+        "description" : "solicita acceso a destino1 a través de bastion",
+        "destinationId" : "2",
+        "id" : "9",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "SSH with proxy tunnel"
+      } ],
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "documentation" : { },
+      "id" : "2",
+      "location" : "Unspecified",
+      "name" : "Host de usuario",
+      "properties" : {
+        "structurizr.dsl.identifier" : "userhost"
+      },
+      "relationships" : [ {
+        "description" : "Solicitud de conexion",
+        "destinationId" : "3",
+        "id" : "13",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "SSH command"
+      } ],
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Proxy de autenticacion a la red interna.",
+      "documentation" : { },
+      "group" : "Infraestructura servidores",
+      "id" : "3",
+      "location" : "Unspecified",
+      "name" : "Bastion",
+      "properties" : {
+        "structurizr.dsl.identifier" : "bastion"
+      },
+      "relationships" : [ {
+        "description" : "Valida que certificado no este expirado ni revocado",
+        "destinationId" : "6",
+        "id" : "10",
+        "sourceId" : "3",
+        "tags" : "Relationship",
+        "technology" : "REST HTTPS"
+      }, {
+        "description" : "Redirije solicitud de conexion",
+        "destinationId" : "5",
+        "id" : "14",
+        "sourceId" : "3",
+        "tags" : "Relationship",
+        "technology" : "SSH"
+      } ],
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Autoridad de certificacion, registro y validacion.",
+      "documentation" : { },
+      "group" : "Infraestructura servidores",
+      "id" : "4",
+      "location" : "Unspecified",
+      "name" : "EJBCA",
+      "properties" : {
+        "structurizr.dsl.identifier" : "ejbca"
+      },
+      "tags" : "Element,Software System"
+    }, {
+      "description" : "Ejemplo de servidor destino.",
+      "documentation" : { },
+      "group" : "Infraestructura servidores",
+      "id" : "5",
+      "location" : "Unspecified",
+      "name" : "Servidor destino 1",
+      "properties" : {
+        "structurizr.dsl.identifier" : "destino1"
+      },
+      "relationships" : [ {
+        "description" : "Valida que certificado no este expirado ni revocado",
+        "destinationId" : "6",
+        "id" : "15",
+        "sourceId" : "5",
+        "tags" : "Relationship",
+        "technology" : "REST HTTPS"
+      } ],
+      "tags" : "Element,Software System"
+    }, {
+      "containers" : [ {
+        "components" : [ {
+          "documentation" : { },
+          "id" : "8",
+          "name" : "Validacion de certificado",
+          "properties" : {
+            "structurizr.dsl.identifier" : "2f00faec-d498-41b1-92d4-5cb4ce0fa127"
+          },
+          "tags" : "Element,Component",
+          "technology" : "Python"
+        } ],
+        "documentation" : { },
+        "id" : "7",
+        "name" : "Servicio de autenticacion",
+        "properties" : {
+          "structurizr.dsl.identifier" : "67400241-eb72-42fa-a942-75afbda5309f"
+        },
+        "tags" : "Element,Container",
+        "technology" : "Python Fast Api"
+      } ],
+      "description" : "Servidor de autenticacion de usuarios.",
+      "documentation" : { },
+      "group" : "Infraestructura servidores",
+      "id" : "6",
+      "location" : "Unspecified",
+      "name" : "Servidor de autenticacion",
+      "properties" : {
+        "structurizr.dsl.identifier" : "auth_server"
+      },
+      "relationships" : [ {
+        "description" : "Pregunta estado de revocacion de un certificado",
+        "destinationId" : "4",
+        "id" : "11",
+        "sourceId" : "6",
+        "tags" : "Relationship",
+        "technology" : "REST HTTPS"
+      }, {
+        "description" : "Busca el certificado completo",
+        "destinationId" : "4",
+        "id" : "12",
+        "sourceId" : "6",
+        "tags" : "Relationship",
+        "technology" : "REST HTTPS"
+      } ],
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "PKI con Uso de Certificados x509 para autenticar usuarios en servidores",
+  "properties" : {
+    "structurizr.dsl" : "d29ya3NwYWNlICJQS0kgY29uIFVzbyBkZSBDZXJ0aWZpY2Fkb3MgeDUwOSBwYXJhIGF1dGVudGljYXIgdXN1YXJpb3MgZW4gc2Vydmlkb3JlcyIgewogICAgbW9kZWwgewogICAgICAgIHVzZXIgPSBwZXJzb24gIlVzdWFyaW8gZmluYWwiCiAgICAgICAgdXNlckhvc3QgPSBzb2Z0d2FyZVN5c3RlbSAiSG9zdCBkZSB1c3VhcmlvIgogICAgICAgIGdyb3VwICJJbmZyYWVzdHJ1Y3R1cmEgc2Vydmlkb3JlcyIgewogICAgICAgICAgICBiYXN0aW9uID0gc29mdHdhcmVTeXN0ZW0gIkJhc3Rpb24iICJQcm94eSBkZSBhdXRlbnRpY2FjaW9uIGEgbGEgcmVkIGludGVybmEuIgogICAgICAgICAgICBlamJjYSA9IHNvZnR3YXJlU3lzdGVtICJFSkJDQSIgIkF1dG9yaWRhZCBkZSBjZXJ0aWZpY2FjaW9uLCByZWdpc3RybyB5IHZhbGlkYWNpb24uIgogICAgICAgICAgICBkZXN0aW5vMSA9IHNvZnR3YXJlU3lzdGVtICJTZXJ2aWRvciBkZXN0aW5vIDEiICJFamVtcGxvIGRlIHNlcnZpZG9yIGRlc3Rpbm8uIgogICAgICAgICAgICBhdXRoX3NlcnZlciA9IHNvZnR3YXJlU3lzdGVtICJTZXJ2aWRvciBkZSBhdXRlbnRpY2FjaW9uIiAiU2Vydmlkb3IgZGUgYXV0ZW50aWNhY2lvbiBkZSB1c3Vhcmlvcy4iIHsKICAgICAgICAgICAgICAgIGNvbnRhaW5lciAiU2VydmljaW8gZGUgYXV0ZW50aWNhY2lvbiIgewogICAgICAgICAgICAgICAgICAgIHRlY2hub2xvZ3kgIlB5dGhvbiBGYXN0IEFwaSIKICAgICAgICAgICAgICAgICAgICBjb21wb25lbnQgIlZhbGlkYWNpb24gZGUgY2VydGlmaWNhZG8iIHsKICAgICAgICAgICAgICAgICAgICAgICAgdGVjaG5vbG9neSAiUHl0aG9uIgogICAgICAgICAgICAgICAgICAgIH0gLT4gIlNlcnZpY2lvIGRlIGF1dGVudGljYWNpb24iCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHVzZXIgLT4gdXNlckhvc3QgInNvbGljaXRhIGFjY2VzbyBhIGRlc3Rpbm8xIGEgdHJhdsOpcyBkZSBiYXN0aW9uIiAiU1NIIHdpdGggcHJveHkgdHVubmVsIgogICAgICAgICAgICBiYXN0aW9uIC0+IGF1dGhfc2VydmVyICJWYWxpZGEgcXVlIGNlcnRpZmljYWRvIG5vIGVzdGUgZXhwaXJhZG8gbmkgcmV2b2NhZG8iICJSRVNUIEhUVFBTIgogICAgICAgICAgICBhdXRoX3NlcnZlciAtPiBlamJjYSAiUHJlZ3VudGEgZXN0YWRvIGRlIHJldm9jYWNpb24gZGUgdW4gY2VydGlmaWNhZG8iICJSRVNUIEhUVFBTIgogICAgICAgICAgICBhdXRoX3NlcnZlciAtPiBlamJjYSAiQnVzY2EgZWwgY2VydGlmaWNhZG8gY29tcGxldG8iICJSRVNUIEhUVFBTIgogICAgICAgICAgICB1c2VySG9zdCAtPiBiYXN0aW9uICJTb2xpY2l0dWQgZGUgY29uZXhpb24iICJTU0ggY29tbWFuZCIKICAgICAgICAgICAgYmFzdGlvbiAtPiBkZXN0aW5vMSAiUmVkaXJpamUgc29saWNpdHVkIGRlIGNvbmV4aW9uIiAiU1NIIgogICAgICAgICAgICBkZXN0aW5vMSAtPiBhdXRoX3NlcnZlciAiVmFsaWRhIHF1ZSBjZXJ0aWZpY2FkbyBubyBlc3RlIGV4cGlyYWRvIG5pIHJldm9jYWRvIiAiUkVTVCBIVFRQUyIKICAgICAgICB9CiAgICB9CgogICAgdmlld3MgewogICAgICAgIHN5c3RlbUxhbmRzY2FwZSBDb21wYW55IHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9MYXlvdXQgbHIKICAgICAgICB9CiAgICAgICAgY29udGFpbmVyIGF1dGhfc2VydmVyIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9MYXlvdXQgbHIKICAgICAgICB9CgogICAgICAgIHRoZW1lIGRlZmF1bHQKICAgIH0KfQ=="
+  },
+  "views" : {
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "Company",
+      "metadataSymbols" : "SquareBrackets",
+      "styles" : { },
+      "terminology" : { },
+      "themes" : [ "https://static.structurizr.com/themes/default/theme.json" ]
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "applied" : false,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "elements" : [ {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "generatedKey" : true,
+      "key" : "Container-001",
+      "order" : 2,
+      "softwareSystemId" : "6"
+    } ],
+    "systemLandscapeViews" : [ {
+      "automaticLayout" : {
+        "applied" : true,
+        "edgeSeparation" : 0,
+        "implementation" : "Graphviz",
+        "nodeSeparation" : 300,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 300,
+        "vertices" : false
+      },
+      "dimensions" : {
+        "height" : 983,
+        "width" : 4620
+      },
+      "elements" : [ {
+        "id" : "1",
+        "x" : 199,
+        "y" : 220
+      }, {
+        "id" : "2",
+        "x" : 949,
+        "y" : 220
+      }, {
+        "id" : "3",
+        "x" : 1699,
+        "y" : 220
+      }, {
+        "id" : "4",
+        "x" : 3949,
+        "y" : 220
+      }, {
+        "id" : "5",
+        "x" : 2449,
+        "y" : 374
+      }, {
+        "id" : "6",
+        "x" : 3199,
+        "y" : 220
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "Company",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "10",
+        "vertices" : [ {
+          "x" : 2449,
+          "y" : 224
+        }, {
+          "x" : 2899,
+          "y" : 224
+        } ]
+      }, {
+        "id" : "11",
+        "vertices" : [ {
+          "x" : 3799,
+          "y" : 520
+        } ]
+      }, {
+        "id" : "12",
+        "vertices" : [ {
+          "x" : 3799,
+          "y" : 220
+        } ]
+      }, {
+        "id" : "13"
+      }, {
+        "id" : "14"
+      }, {
+        "id" : "15"
+      }, {
+        "id" : "9"
+      } ]
+    } ]
+  }
+}
