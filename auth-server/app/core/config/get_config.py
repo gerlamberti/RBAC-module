@@ -1,7 +1,7 @@
 from functools import lru_cache
 import os
 
-from app.core.config import load_config
+from app.core.config.load_config import load_config
 
 
 @lru_cache
