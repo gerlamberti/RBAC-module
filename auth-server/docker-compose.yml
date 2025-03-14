@@ -7,11 +7,12 @@ services:
       - ./app:/code/app
       - ./config:/code/config
     environment:
-      - ENV=bruno
+      - ENV=prod
       - PROJECT_PATH=/code
     command: ["fastapi", "run", "app/main.py", "--port", "8888", "--workers", "1", "--reload"]
     networks:
       - internal-network
+      - ejbca_shared_network
 
   nginx:
     image: nginx:alpine
@@ -30,3 +31,5 @@ services:
 networks:
   internal-network:
     driver: bridge
+  ejbca_shared_network:
+    external: true
