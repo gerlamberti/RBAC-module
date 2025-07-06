@@ -5,7 +5,9 @@ myenv/
 .venv/
 .idea
 __pycache__
-certs
+certs/
 *.pyc
 .coverage
-.structurizr/
+certificates/
+*.bkp
+.structurizr

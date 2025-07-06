@@ -1,0 +1,5 @@
+ejbca:
+  base_url: "https://debian-12-ejbca-1:8443/ejbca/ejbca-rest-api"
+  certificate_path: "/code/auth-server/certs/superadmin.pem"
+  cert_password: "/code/auth-server/certs/superadmin.key"
+  issuer_dn: "CN=PSI-CA"
