@@ -41,19 +41,18 @@ class AuthenticateService:
                           certificate.subject_components["role"])
         self.logger.debug("Username: %s", username)
         
-        #if certificate.subject_components["role"] != username:
-            #return AuthResponse(allowed=False), None
-        roles_str = certificate.subject_components["role"]
-        roles = [role.strip() for role in roles_str.split(",")]
-        if username not in roles:
-            return AuthResponse(allowed=False), None
-        user_role = username
+       # ###Incorporación del modulo del Control del Rol###
+        roles_str = certificate.subject_components["role"] # Toma el rol del certicado
+        roles = [role.strip() for role in roles_str.split(",")] # Puede tener mas de un rol
+        if username not in roles: # Revisa si el nombre del usuario destino corresponde al rol de acceso
+            return AuthResponse(allowed=False), None # Lo rechaza si corresponde
+        user_role = username # Establece el Rol
         try:
             authorized_keys_entry = self.authorized_keys_builder.build(
                 certificate.subject_components["emailAddress"],
                 certificate.subject_components["CN"],
                 #certificate.subject_components["role"],
-                user_role,
+                user_role, # Devuelve el rol a fin de tener el Rol para los logs
                 certificate.public_key
             )
         except Exception as e:
